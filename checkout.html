@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Checkout | BioZymGrow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:'Poppins',sans-serif;
+  background:#f4f6f8;
+}
+.card{
+  border-radius:16px;
+}
+.price{
+  color:#198754;
+  font-weight:700;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container py-4">
+
+  <!-- TOMBOL KEMBALI -->
+  <button class="btn btn-outline-secondary mb-3"
+          onclick="kembaliKeKeranjang()">
+    ⬅ Kembali ke Keranjang
+  </button>
+
+  <h3 class="fw-bold mb-4">Checkout</h3>
+
+  <div class="row g-4">
+
+    <!-- DATA PEMBELI -->
+    <div class="col-md-7">
+      <div class="card p-4">
+
+        <h5 class="mb-3">Data Pembeli</h5>
+
+        <input id="nama" class="form-control mb-3" placeholder="Nama Lengkap">
+        <input id="hp" class="form-control mb-3" placeholder="No HP">
+        <textarea id="alamat" class="form-control mb-3" placeholder="Alamat Lengkap"></textarea>
+
+        <!-- EKSPEDISI -->
+        <h6 class="mt-3">Ekspedisi</h6>
+        <select id="ekspedisi" class="form-select mb-3" onchange="pilihEkspedisi()">
+          <option value="">-- Pilih Ekspedisi --</option>
+          <option value="JNE" data-ongkir="15000">JNE (Rp15.000)</option>
+          <option value="J&T" data-ongkir="12000">J&T (Rp12.000)</option>
+          <option value="SiCepat" data-ongkir="10000">SiCepat (Rp10.000)</option>
+        </select>
+
+        <!-- METODE PEMBAYARAN -->
+        <h6>Metode Pembayaran</h6>
+        <select id="metode" class="form-select mb-3" onchange="ubahMetode()">
+          <option value="">-- Pilih Metode --</option>
+          <option value="bank">Transfer Bank</option>
+          <option value="ewallet">E-Wallet</option>
+        </select>
+
+        <select id="bank" class="form-select mb-3 d-none">
+          <option value="">-- Pilih Bank --</option>
+          <option>BCA</option>
+          <option>BRI</option>
+          <option>BNI</option>
+          <option>Mandiri</option>
+        </select>
+
+        <select id="ewallet" class="form-select mb-3 d-none">
+          <option value="">-- Pilih E-Wallet --</option>
+          <option>OVO</option>
+          <option>DANA</option>
+          <option>GoPay</option>
+          <option>ShopeePay</option>
+        </select>
+
+      </div>
+    </div>
+
+    <!-- RINGKASAN -->
+    <div class="col-md-5">
+      <div class="card p-4">
+
+        <h5>Ringkasan Pesanan</h5>
+        <div id="ringkasanProduk" class="mt-3"></div>
+
+        <hr>
+        <div class="d-flex justify-content-between">
+          <span>Subtotal</span>
+          <span id="subtotal" class="price">Rp0</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>Ongkir</span>
+          <span id="ongkir" class="price">Rp0</span>
+        </div>
+
+        <hr>
+        <div class="d-flex justify-content-between fs-5 fw-bold">
+          <span>Total</span>
+          <span id="total" class="price">Rp0</span>
+        </div>
+
+        <button type="button"
+                class="btn btn-success w-100 mt-4 rounded-pill"
+                onclick="konfirmasiPesanan()">
+          Konfirmasi Pesanan
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ================== DATA PRODUK ==================
+const products = [
+  {id:1,name:"BioZymGrow 250 ml",price:10000},
+  {id:2,name:"BioZymGrow 500 ml",price:18000},
+  {id:3,name:"Refill EcoEnzym 1 Liter",price:30000}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let subtotal = 0;
+let ongkir = 0;
+
+// ================== RENDER ==================
+function renderRingkasan(){
+  const box = document.getElementById("ringkasanProduk");
+  box.innerHTML = "";
+  subtotal = 0;
+
+  cart.forEach(item=>{
+    const p = products.find(x=>x.id===item.id);
+    const sub = p.price * item.qty;
+    subtotal += sub;
+
+    box.innerHTML += `
+      <div class="d-flex justify-content-between mb-1">
+        <span>${p.name} x ${item.qty}</span>
+        <span>Rp${sub.toLocaleString("id-ID")}</span>
+      </div>`;
+  });
+
+  document.getElementById("subtotal").innerText =
+    "Rp"+subtotal.toLocaleString("id-ID");
+
+  updateTotal();
+}
+
+function pilihEkspedisi(){
+  const e = document.getElementById("ekspedisi");
+  ongkir = Number(e.options[e.selectedIndex].dataset.ongkir || 0);
+  document.getElementById("ongkir").innerText =
+    "Rp"+ongkir.toLocaleString("id-ID");
+  updateTotal();
+}
+
+function updateTotal(){
+  document.getElementById("total").innerText =
+    "Rp"+(subtotal+ongkir).toLocaleString("id-ID");
+}
+
+// ================== METODE ==================
+function ubahMetode(){
+  document.getElementById("bank").classList.add("d-none");
+  document.getElementById("ewallet").classList.add("d-none");
+
+  const metode = document.getElementById("metode").value;
+  if(metode==="bank") document.getElementById("bank").classList.remove("d-none");
+  if(metode==="ewallet") document.getElementById("ewallet").classList.remove("d-none");
+}
+
+// ================== NAVIGASI ==================
+function kembaliKeKeranjang(){
+  window.location.href = "keranjang.html";
+}
+
+function konfirmasiPesanan(){
+  const nama = document.getElementById("nama").value;
+  const hp = document.getElementById("hp").value;
+  const alamat = document.getElementById("alamat").value;
+  const ekspedisi = document.getElementById("ekspedisi").value;
+  const metode = document.getElementById("metode").value;
+
+  if(!nama || !hp || !alamat || !ekspedisi || !metode){
+    alert("Lengkapi semua data checkout!");
+    return;
+  }
+
+  localStorage.setItem("checkout", JSON.stringify({
+    nama,hp,alamat,ekspedisi,metode,subtotal,ongkir,total:subtotal+ongkir
+  }));
+
+  window.location.href = "pembayaran.html";
+}
+
+// ==================
+renderRingkasan();
+</script>
+
+</body>
+</html>

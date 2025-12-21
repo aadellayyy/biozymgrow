@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Produk | BioZymGrow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7f9;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.07);
+      height: 100%;
+    }
+    .product-img {
+      width: 100%;
+      border-radius: 12px;
+      height: 180px;
+      object-fit: cover;
+    }
+    .price {
+      color: #198754;
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 6px;
+    }
+    .desc {
+      font-size: 13px;
+      color: #555;
+    }
+    .benefit {
+      font-size: 12px;
+      color: #198754;
+    }
+    .qty-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid #198754;
+      background: white;
+      color: #198754;
+      font-weight: bold;
+    }
+    .qty-input {
+      width: 45px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .cart-bar {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      border-top: 1px solid #ddd;
+      padding: 15px;
+      box-shadow: 0 -10px 20px rgba(0,0,0,.08);
+    }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-success">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">BioZymGrow</a>
+  </div>
+</nav>
+
+<section class="py-4">
+  <div class="container">
+    <h4 class="fw-bold mb-4">Semua Produk BioZymGrow</h4>
+    <div id="productList" class="row g-4"></div>
+  </div>
+</section>
+
+<div class="cart-bar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">
+      Total Item: <span id="totalItem">0</span>
+    </span>
+    <a href="keranjang.html" class="btn btn-success rounded-pill px-4">
+      🛒 Lihat Keranjang
+    </a>
+  </div>
+</div>
+
+<script>
+/* =======================
+   DATA PRODUK (MASTER)
+======================= */
+const products = [
+  {
+    id: 1,
+    name: "BioZymGrow 250 ml",
+    price: 10000,
+    img: "assets/biozym-250.jpg",
+    desc: "EcoEnzym organik untuk tanaman rumah & sayur.",
+    benefit: "✔ Suburkan tanah ✔ Ramah lingkungan"
+  },
+  {
+    id: 2,
+    name: "BioZymGrow 500 ml",
+    price: 18000,
+    img: "assets/biozym-500.jpg",
+    desc: "Ukuran hemat untuk pemakaian rutin.",
+    benefit: "✔ Lebih ekonomis ✔ Efek tahan lama"
+  },
+  {
+    id: 3,
+    name: "Refill EcoEnzym 1 Liter",
+    price: 30000,
+    img: "assets/biozym-refill.jpg",
+    desc: "Isi ulang tanpa botol plastik.",
+    benefit: "✔ Eco-friendly ✔ Cocok stok"
+  }
+];
+
+/* =======================
+   KERANJANG (ID + QTY)
+======================= */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const productList = document.getElementById("productList");
+
+function getQty(id) {
+  const item = cart.find(i => i.id === id);
+  return item ? item.qty : 0;
+}
+
+/* =======================
+   RENDER PRODUK
+======================= */
+function renderProducts() {
+  productList.innerHTML = "";
+  products.forEach(p => {
+    productList.innerHTML += `
+      <div class="col-md-6 col-lg-4">
+        <div class="product-card">
+          <img src="${p.img}" class="product-img">
+          <h6 class="fw-bold mt-2">${p.name}</h6>
+          <p class="desc">${p.desc}</p>
+          <p class="benefit">${p.benefit}</p>
+          <div class="price">Rp${p.price.toLocaleString("id-ID")}</div>
+
+          <div class="qty-box">
+            <button class="qty-btn" onclick="updateQty(${p.id}, -1)">−</button>
+            <input id="qty-${p.id}" class="qty-input" value="${getQty(p.id)}" readonly>
+            <button class="qty-btn" onclick="updateQty(${p.id}, 1)">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+/* =======================
+   UPDATE QTY (AMAN)
+======================= */
+function updateQty(id, change) {
+  let item = cart.find(i => i.id === id);
+
+  if (!item && change > 0) {
+    cart.push({ id, qty: 1 });
+  } else if (item) {
+    item.qty += change;
+    if (item.qty <= 0) {
+      cart = cart.filter(i => i.id !== id); // 🔥 HAPUS QTY 0
+    }
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderProducts();
+  updateCartBar();
+}
+
+/* =======================
+   CART BAR
+======================= */
+function updateCartBar() {
+  const total = cart.reduce((sum, i) => sum + i.qty, 0);
+  document.getElementById("totalItem").innerText = total;
+}
+
+/* INIT */
+renderProducts();
+updateCartBar();
+</script>
+
+</body>
+</html>

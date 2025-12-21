@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Pembayaran | BioZymGrow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7f9;
+    }
+    .box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    }
+    .pay-option {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: .2s;
+    }
+    .pay-option:hover {
+      border-color: #198754;
+      background: #f0fff7;
+    }
+    .pay-option input {
+      margin-right: 8px;
+    }
+    .success-popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .success-box {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark bg-success">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="checkout.html">⬅ Pembayaran</a>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div class="box">
+    <h5 class="fw-bold mb-3">💳 Pembayaran</h5>
+
+    <div class="mb-3">
+      <span class="text-muted">Total Pembayaran</span>
+      <h3 class="text-success fw-bold" id="totalBayar">Rp0</h3>
+    </div>
+
+    <!-- METODE -->
+    <h6 class="fw-bold mb-2">Pilih Metode Pembayaran</h6>
+
+    <div class="pay-option">
+      <label class="w-100">
+        <input type="radio" name="pay" value="bank">
+        🏦 Transfer Bank
+        <div class="text-muted small ms-4">
+          BCA • BRI • Mandiri • BNI
+        </div>
+      </label>
+    </div>
+
+    <div class="pay-option">
+      <label class="w-100">
+        <input type="radio" name="pay" value="ewallet">
+        📱 E-Wallet
+        <div class="text-muted small ms-4">
+          DANA • OVO • ShopeePay • GoPay
+        </div>
+      </label>
+    </div>
+
+    <div class="pay-option">
+      <label class="w-100">
+        <input type="radio" name="pay" value="qris">
+        🔳 QRIS
+        <div class="text-muted small ms-4">
+          Semua Bank & E-Wallet
+        </div>
+      </label>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-success w-100 rounded-pill mt-3"
+      onclick="prosesPembayaran()">
+      Konfirmasi Pembayaran
+    </button>
+  </div>
+</div>
+
+<!-- POPUP SUKSES -->
+<div class="success-popup" id="popup">
+  <div class="success-box">
+    <h5 class="fw-bold text-success mb-2">✅ Pembayaran Berhasil</h5>
+    <p class="small text-muted mb-3">
+      Terima kasih, pesanan kamu sedang diproses.
+    </p>
+    <button class="btn btn-success w-100 rounded-pill" onclick="selesai()">
+      Kembali ke Beranda
+    </button>
+  </div>
+</div>
+
+<script>
+// 🔁 Ambil data checkout
+const checkout = JSON.parse(localStorage.getItem("checkout"));
+if (!checkout) {
+  window.location.href = "checkout.html";
+}
+
+// Tampilkan total
+document.getElementById("totalBayar").innerText =
+  "Rp" + checkout.total.toLocaleString("id-ID");
+
+function prosesPembayaran() {
+  const metode = document.querySelector('input[name="pay"]:checked');
+  if (!metode) {
+    alert("Silakan pilih metode pembayaran");
+    return;
+  }
+
+  // Simulasi pembayaran sukses
+  document.getElementById("popup").style.display = "flex";
+}
+
+function selesai() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
